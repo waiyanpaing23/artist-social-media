@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -28,6 +29,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::patch('/posts/{id}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/post/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+    Route::post('/post/like', [LikeController::class, 'likeUnlike'])->name('post.like');
 });
 
 require __DIR__.'/auth.php';

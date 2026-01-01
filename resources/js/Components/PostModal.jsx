@@ -96,7 +96,7 @@ const PostModal = ({ show, onClose, postToEdit = null }) => {
                         <div className="space-y-6">
 
                             <ImageUploadGrid
-                                label="Artwork Files"
+                                label="Artwork Images or Videos"
                                 existingMedia={data.existing_media}
                                 newMedia={data.main_artwork}
                                 onRemoveExisting={markForDeletion}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FaTrash, FaExclamationTriangle } from "react-icons/fa";
-import { FaRegComment } from 'react-icons/fa6';
+import { FaHandsClapping, FaRegComment } from 'react-icons/fa6';
 import { IoColorPalette } from "react-icons/io5";
 import { PiHandsClapping } from "react-icons/pi";
 import TimeAgo from './TimeAgo';
@@ -22,6 +22,12 @@ const PostCard = ({ user, post, onEdit }) => {
             preserveScroll: true,
         });
     };
+
+    const handleLike = () => {
+        router.post('/post/like', {post_id: post.id}, {
+            preserveScroll: true
+        });
+    }
 
     return (
         <div className="bg-white border border-gray-200 rounded-xl p-6 my-5">
@@ -123,9 +129,15 @@ const PostCard = ({ user, post, onEdit }) => {
 
             {/* Minimal Actions */}
             <div className="flex items-cente mt-5 gap-6">
-                <button className="group flex items-center gap-2">
+                <button
+                    onClick={handleLike}
+                    className="group flex items-center gap-2">
                     <span className="text-xl group-hover:scale-110 transition">
-                        <PiHandsClapping size={26} />
+                        {post.is_liked_by_user ? (
+                            <FaHandsClapping size={26} />
+                        ) : (
+                            <PiHandsClapping size={26} />
+                        )}
                     </span>
                 </button>
                 <button className="group flex items-center gap-2">
@@ -134,7 +146,7 @@ const PostCard = ({ user, post, onEdit }) => {
                     </span>
                 </button>
             </div>
-            <div className="mt-3 text-sm font-semibold text-gray-600">10 Appreciations</div>
+            <div className="mt-3 text-sm font-semibold text-gray-600">{post.likes_count} Appreciations</div>
 
             {showDeleteConfirm && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">

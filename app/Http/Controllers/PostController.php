@@ -19,7 +19,15 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with('media', 'author')->orderBy('created_at', 'desc')->get();
+        $user_id = Auth::id();
+
+        $posts = Post::with('media', 'author')
+                ->orderBy('created_at', 'desc')
+                ->withCount('likes')
+                ->withExists(['likes as is_liked_by_user' => function ($query) use ($user_id) {
+                    $query->where('user_id', $user_id);
+                }])
+                ->get();
 
         return Inertia::render('Home/Home', [
             'posts' => $posts,
