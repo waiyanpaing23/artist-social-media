@@ -1,7 +1,8 @@
-import CreateModal from '@/Components/CreateModal';
+import CreateModal from '@/Components/PostModal';
 import Navbar from '@/Components/Navbar';
 import { usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function AuthenticatedLayout({ header, children }) {
 
@@ -11,9 +12,22 @@ export default function AuthenticatedLayout({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
 
+    const {flash} = usePage().props;
+
+    useEffect(() => {
+        if (flash.success) {
+            toast.success(flash.success);
+        }
+        if (flash.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
+
     return (
         <div className="min-h-screen bg-slate-50">
             <Navbar onOpenCreate={() => setShowCreateModal(true)} />
+
+            <Toaster position='top-center' />
 
             <main>{children}</main>
 

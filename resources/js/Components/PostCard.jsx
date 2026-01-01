@@ -1,75 +1,178 @@
-import React from 'react'
-import { FaHandsClapping, FaRegComment, FaRegStar } from 'react-icons/fa6';
-import { MdOutlineStar, MdOutlineStars } from 'react-icons/md';
-import { RiMedalFill, RiMedalLine } from "react-icons/ri";
+import React, { useState } from 'react'
+import { FaTrash, FaExclamationTriangle } from "react-icons/fa";
+import { FaRegComment } from 'react-icons/fa6';
+import { IoColorPalette } from "react-icons/io5";
 import { PiHandsClapping } from "react-icons/pi";
+import TimeAgo from './TimeAgo';
+import ImageCarousel from './ImageCarousel';
+import { Link, router } from '@inertiajs/react';
 
-const PostCard = ({ post }) => {
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6 my-5">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-100">
-                <img
-                    className="w-full h-full object-cover"
-                    src={`https://ui-avatars.com/api/?name=${post.author}&background=random`}
-                    alt={post.author}
-                />
+const PostCard = ({ user, post, onEdit }) => {
+
+    const images = post.media || [];
+    const isArtwork = post.type === 'artwork';
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    const handleDeletePost = () => {
+        router.delete(`/post/delete/${post.id}`, {
+            onSuccess: () => {
+                setShowDeleteConfirm(false);
+            },
+            preserveScroll: true,
+        });
+    };
+
+    return (
+        <div className="bg-white border border-gray-200 rounded-xl p-6 my-5">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-100">
+                        <img
+                            className="w-full h-full object-cover"
+                            src={post.author.profile_picture || `https://ui-avatars.com/api/?name=${post.author.name}&background=random`}
+                            alt={post.author}
+                        />
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="font-bold text-sm text-gray-900">{post.author.name}</span>
+                        {/* <span className="text-xs text-gray-400">{post.created_at}</span> */}
+                        <div className='flex item-center'>
+                            <TimeAgo timestamp={post.created_at} />
+                        </div>
+                    </div>
+                </div>
+
+                <div className='flex items-center'>
+                    {isArtwork && (
+                    <span className="flex items-center gap-1 px-2 py-0.5 me-3 rounded-full bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wide">
+                        <IoColorPalette size={12} />
+                        <span>Artwork</span>
+                    </span>
+                    )}
+                    <div className="flex items-center">
+                        {user && post.author.id === user.id && (
+                            <div className="relative">
+
+                                <div className="flex items-center space-x-4">
+                                    <button onClick={() => setShowDropdown(!showDropdown)} className="text-gray-400 hover:text-gray-600">•••</button>
+                                </div>
+
+                                {/* dropdown */}
+                                {showDropdown && (
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-40"
+                                            onClick={() => setShowDropdown(false)}
+                                        ></div>
+
+                                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-100 z-50 origin-top-right animate-fadeIn">
+
+                                            <button
+                                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                                                onClick={() => {
+                                                    setShowDropdown(false);
+                                                    onEdit(post);
+                                                }}
+                                            >
+                                                Edit Post
+                                            </button>
+
+                                            <button onClick={() => {
+                                                setShowDropdown(false);
+                                                setShowDeleteConfirm(true);
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                            >Delete Post</button>
+                                        </div>
+                                    </>
+                                )}
+
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
-            <div className="flex flex-col">
-                <span className="font-bold text-sm text-gray-900">Wai Yan</span>
-                <span className="text-xs text-gray-400">2 hrs ago</span>
-            </div>
-          </div>
-          <button className="text-gray-400 hover:text-gray-600">•••</button>
-      </div>
 
-      {/* Large Artwork Image */}
-      {/* {post.image ? ( */}
-        <div className="relative group rounded-xl overflow-hidden shadow-sm mb-4 border border-gray-100">
+            {/* Large Artwork Image */}
+            {isArtwork ? (
+                <div>
+                    <div className="p-4 bg-white rounded-lg rounded">
+                        <ImageCarousel media={images} dimensions={post.dimensions} />
+                    </div>
 
-            <img
-                src="/images/starrynight.png"
-                alt="Post content"
-                className="w-full h-auto object-cover"
-            />
+                    <div>
+                        {post.medium && <p className='mt-1 font-semibold text-gray-400'>{post.medium}</p>}
+                        <h2 className="text-xl font-bold text-gray-900 mb-2">{post.title}</h2>
+                        {post.content && <p className="text-gray-700">{post.content}</p>}
+                    </div>
+                </div>
+            ) : (
 
-            {post.dimensions && (
-                <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/70 text-white text-xs font-medium px-2 py-1 rounded-md backdrop-blur-sm">
-                    {post.dimensions}
+                <div>
+                    <div className="text-gray-800 text-base leading-relaxed whitespace-pre-line">
+                        {post.content}
+                    </div>
+                    {images.length > 0 &&
+                        (<div className="p-4 bg-white rounded-lg rounded">
+                            <ImageCarousel media={images} dimensions={post.dimensions} />
+                        </div>)}
                 </div>
             )}
 
-        </div>
+            {/* Minimal Actions */}
+            <div className="flex items-cente mt-5 gap-6">
+                <button className="group flex items-center gap-2">
+                    <span className="text-xl group-hover:scale-110 transition">
+                        <PiHandsClapping size={26} />
+                    </span>
+                </button>
+                <button className="group flex items-center gap-2">
+                    <span className="text-xl group-hover:scale-110 transition">
+                        <FaRegComment size={24} />
+                    </span>
+                </button>
+            </div>
+            <div className="mt-3 text-sm font-semibold text-gray-600">10 Appreciations</div>
 
-        <div>
-            <p className='mt-1 font-bold text-gray-400'>Oil On Canvas</p>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Starry Night</h2>
-            <p className="text-gray-700">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Praesentium tempore commodi repellat magnam.</p>
-        </div>
-      {/* ) : (
-        <div className="p-8 bg-gray-50 rounded-xl mb-4 text-center text-gray-500">
-            {post.content}
-        </div>
-      )} */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden transform transition-all scale-100">
 
-      {/* Minimal Actions */}
-      <div className="flex items-cente mt-5 gap-6">
-        <button className="group flex items-center gap-2">
-            <span className="text-xl group-hover:scale-110 transition">
-                <PiHandsClapping size={26} />
-            </span>
-        </button>
-        <button className="group flex items-center gap-2">
-            <span className="text-xl group-hover:scale-110 transition">
-                <FaRegComment size={24} />
-            </span>
-        </button>
-      </div>
-      <div className="mt-3 text-sm font-semibold text-gray-600">10 Appreciations</div>
-    </div>
-  );
+                        <div className="p-6 text-center">
+
+                            <div className="flex items-center justify-center mb-4">
+                                <FaExclamationTriangle className="h-6 w-6 text-rose-600" />
+                            </div>
+
+                            <p className='text-gray-700'>
+                                Are you sure you want to remove this post?
+                            </p>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                            <button
+                                type="button"
+                                onClick={handleDeletePost}
+                                className="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-rose-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                Yes, Delete
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 };
 
 export default PostCard
