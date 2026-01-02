@@ -6,6 +6,7 @@ import { PiHandsClapping } from "react-icons/pi";
 import TimeAgo from './TimeAgo';
 import ImageCarousel from './ImageCarousel';
 import { Link, router } from '@inertiajs/react';
+import CommentSection from './CommentSection';
 
 const PostCard = ({ user, post, onEdit }) => {
 
@@ -13,6 +14,8 @@ const PostCard = ({ user, post, onEdit }) => {
     const isArtwork = post.type === 'artwork';
     const [showDropdown, setShowDropdown] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    const [showComments, setShowComments] = useState(false);
 
     const handleDeletePost = () => {
         router.delete(`/post/delete/${post.id}`, {
@@ -27,6 +30,10 @@ const PostCard = ({ user, post, onEdit }) => {
         router.post('/post/like', {post_id: post.id}, {
             preserveScroll: true
         });
+    }
+
+    const closeComment = () => {
+        setShowComments(false);
     }
 
     return (
@@ -140,13 +147,20 @@ const PostCard = ({ user, post, onEdit }) => {
                         )}
                     </span>
                 </button>
-                <button className="group flex items-center gap-2">
+                <button onClick={() => setShowComments(!showComments)} className="group flex items-center gap-2">
                     <span className="text-xl group-hover:scale-110 transition">
                         <FaRegComment size={24} />
                     </span>
                 </button>
             </div>
-            <div className="mt-3 text-sm font-semibold text-gray-600">{post.likes_count} Appreciations</div>
+            <div className="mt-3 text-sm font-semibold text-gray-600">
+                <span>{post.likes_count} Appreciations</span>
+                <span onClick={() => setShowComments(!showComments)} className='ms-8 cursor-pointer'>{post.comments_count} Comments</span>
+            </div>
+
+            {showComments &&
+                <CommentSection onClose={closeComment} user={user} postId={post.id} comments={post.comments || []} />
+            }
 
             {showDeleteConfirm && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">

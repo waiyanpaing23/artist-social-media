@@ -77,10 +77,6 @@ const ImageUploadGrid = ({
                 ))}
 
             </div>
-
-            <p className="text-xs text-gray-400 text-right">
-                Total: {existingMedia.length + newMedia.length} images
-            </p>
         </div>
     )
 }

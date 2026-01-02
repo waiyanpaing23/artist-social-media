@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
@@ -7,13 +8,17 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+// Route::get('/', function () {
+//     return Inertia::render('Welcome', [
+//         'canLogin' => Route::has('login'),
+//         'canRegister' => Route::has('register'),
+//         'laravelVersion' => Application::VERSION,
+//         'phpVersion' => PHP_VERSION,
+//     ]);
+// });
+
+Route::get('/', function() {
+    return redirect()->route('feeds');
 });
 
 Route::get('/dashboard', function () {
@@ -31,6 +36,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/post/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
 
     Route::post('/post/like', [LikeController::class, 'likeUnlike'])->name('post.like');
+    Route::post('/comments', [CommentController::class, 'store'])->name('comment.store');
+    Route::patch('/comments/{comment}', [CommentController::class, 'update'])->name('comment.update');
+    Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('comment.destory');
 });
 
 require __DIR__.'/auth.php';

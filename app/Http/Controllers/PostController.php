@@ -27,6 +27,12 @@ class PostController extends Controller
                 ->withExists(['likes as is_liked_by_user' => function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
                 }])
+                ->with([
+                    'comments.user' => function($query) {
+                        $query->select('id', 'name', 'profile_picture');
+                    }
+                ])
+                ->withCount('comments')
                 ->get();
 
         return Inertia::render('Home/Home', [
