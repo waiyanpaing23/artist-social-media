@@ -10,7 +10,7 @@ const MiniProfile = ({ user }) => {
             <Link href="/" className="gap-3">
                 <div className="w-20 h-20 mx-auto rounded-full bg-gray-300 overflow-hidden mb-3">
                     <img
-                        src={`https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=random&size=128`}
+                        src={user?.profile_picture || `https://ui-avatars.com/api/?name=${user?.name}&background=random`}
                         alt="User"
                         className="w-full h-full object-cover"
                     />
@@ -26,15 +26,15 @@ const MiniProfile = ({ user }) => {
             <div className="flex items-center text-center w-full">
 
                 <div className="flex-1">
-                    <span className="block font-bold text-gray-900 text-sm">12</span>
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Works</span>
+                    <span className="block font-bold text-gray-900 text-sm">{user?.artworks_count}</span>
+                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Artworks</span>
                 </div>
 
                 <div className="w-[1px] h-8 bg-gray-100"></div>
 
                 <div className="flex-1">
-                    <span className="block font-bold text-gray-900 text-sm">85</span>
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Collections</span>
+                    <span className="block font-bold text-gray-900 text-sm">{user?.statuses_count}</span>
+                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Posts</span>
                 </div>
 
             </div>

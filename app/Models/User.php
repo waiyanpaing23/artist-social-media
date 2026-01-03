@@ -47,4 +47,19 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+
+    public function artworks()
+    {
+        return $this->hasMany(Post::class)->where('type', 'artwork')->latest();
+    }
+
+    public function statuses()
+    {
+        return $this->hasMany(Post::class)->where('type', 'status')->latest();
+    }
 }
