@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/react';
 import NavLink from '@/Components/NavLink';
 import { MdHome } from "react-icons/md";
 import { FaPlus } from "react-icons/fa6";
+import { TbUsers } from "react-icons/tb";
 
 export default function Navbar({ onOpenCreate }) {
     const { auth } = usePage().props;
@@ -46,7 +47,11 @@ export default function Navbar({ onOpenCreate }) {
                                         onClick={() => setShowDropdown(!showDropdown)}
                                         className="flex items-center justify-center h-10 w-10 rounded-full bg-blue-100 text-blue-600 font-bold hover:bg-blue-200 transition focus:outline-none ring-offset-2 focus:ring-2 ring-blue-500"
                                     >
-                                        {auth.user.name.charAt(0).toUpperCase()}
+                                        <img
+                                            className="w-full h-full object-cover rounded-full"
+                                            src={auth?.user.profile_picture ? `/storage/${auth?.user.profile_picture}` : `https://ui-avatars.com/api/?name=${auth?.user.name}&background=random`}
+                                            alt={auth?.user.name}
+                                        />
                                     </button>
                                 </div>
 
@@ -65,7 +70,7 @@ export default function Navbar({ onOpenCreate }) {
                                             </div>
 
                                             <Link
-                                                href="/profile"
+                                                href={`/profile/${auth?.user.id}`}
                                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
                                                 onClick={() => setShowDropdown(false)}
                                             >

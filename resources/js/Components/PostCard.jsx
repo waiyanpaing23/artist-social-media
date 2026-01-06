@@ -5,11 +5,12 @@ import { IoColorPalette } from "react-icons/io5";
 import { PiHandsClapping } from "react-icons/pi";
 import TimeAgo from './TimeAgo';
 import ImageCarousel from './ImageCarousel';
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import CommentSection from './CommentSection';
 
 const PostCard = ({ user, post, onEdit }) => {
 
+    const { auth } = usePage().props;
     const images = post.media || [];
     const isArtwork = post.type === 'artwork';
     const [showDropdown, setShowDropdown] = useState(false);
@@ -41,16 +42,23 @@ const PostCard = ({ user, post, onEdit }) => {
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-100">
-                        <img
-                            className="w-full h-full object-cover"
-                            src={post.author.profile_picture || `https://ui-avatars.com/api/?name=${post.author.name}&background=random`}
-                            alt={post.author}
-                        />
-                    </div>
+                    <Link href={`/profile/${post.author.id}`} onClick={(e) => e.stopPropagation()} className="shrink-0">
+                        <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-100">
+                            <img
+                                className="w-full h-full object-cover"
+                                src={post.author?.profile_picture ? `/storage/${post.author?.profile_picture}` : `https://ui-avatars.com/api/?name=${post.author.name}&background=random`}
+                                alt={post.author}
+                            />
+                        </div>
+                    </Link>
                     <div className="flex flex-col">
-                        <span className="font-bold text-sm text-gray-900">{post.author.name}</span>
-                        {/* <span className="text-xs text-gray-400">{post.created_at}</span> */}
+                        <Link
+                            href={`/profile/${post.author.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="font-bold text-sm text-gray-900 hover:text-blue-600 hover:underline transition w-fit"
+                        >
+                            {post.author.name}
+                        </Link>
                         <div className='flex item-center'>
                             <TimeAgo timestamp={post.created_at} />
                         </div>
@@ -65,7 +73,7 @@ const PostCard = ({ user, post, onEdit }) => {
                     </span>
                     )}
                     <div className="flex items-center">
-                        {user && post.author.id === user.id && (
+                        {user && post.author.id === auth?.user.id && (
                             <div className="relative">
 
                                 <div className="flex items-center space-x-4">
@@ -108,7 +116,7 @@ const PostCard = ({ user, post, onEdit }) => {
                 </div>
             </div>
 
-            {/* Large Artwork Image */}
+            {/* Image */}
             {isArtwork ? (
                 <div>
                     <div className="p-4 bg-white rounded-lg rounded">

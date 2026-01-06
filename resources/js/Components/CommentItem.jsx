@@ -33,7 +33,7 @@ const CommentItem = ({ comment }) => {
     return (
         <div className="flex gap-3 group">
             <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 overflow-hidden mt-1">
-                <img src={`https://ui-avatars.com/api/?name=${comment.user.name}`} alt={comment.user.name} />
+                <img src={comment.user?.profile_picture ? `/storage/${comment.user?.profile_picture}` : `https://ui-avatars.com/api/?name=${comment.user.name}&background=random`} alt={comment.user.name} />
             </div>
 
             <div className="flex-1">

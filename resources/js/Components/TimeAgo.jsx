@@ -1,4 +1,4 @@
-import { differenceInDays, formatDistanceToNowStrict } from 'date-fns';
+import { differenceInDays, format, formatDistanceToNowStrict } from 'date-fns';
 import React from 'react'
 
 const TimeAgo = ({ timestamp }) => {

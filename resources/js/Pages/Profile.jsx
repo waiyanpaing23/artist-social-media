@@ -1,129 +1,167 @@
+import EditProfileModal from '@/Components/EditProfileModal';
+import PostCard from '@/Components/PostCard';
+import PostModal from '@/Components/PostModal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import { usePage } from '@inertiajs/react';
 import React, { useState } from 'react'
+import { MdClose } from 'react-icons/md';
 
-const Profile = () => {
-  const { auth } = usePage().props;
-  const [activeTab, setActiveTab] = useState('artworks')
+const Profile = ({ user, artworks, statuses }) => {
+    const { auth } = usePage().props;
+    const [activeTab, setActiveTab] = useState('artworks')
 
-  const user = {
-    name: 'Aurelia Moon',
-    username: '@aureliamoon',
-    bio: 'Digital illustrator • Pencil & Ink • Minimalist art',
-    avatar: auth.user.profile_picture || `https://ui-avatars.com/api/?name=${auth.user.name}&background=random`,
-    artworks: 12,
-    posts: 6,
-  }
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [postToEdit, setPostToEdit] = useState(null);
 
-  const artworks = Array.from({ length: 8 }).map((_, i) => ({
-    id: i,
-    image: `https://picsum.photos/seed/art${i}/600/600`,
-    title: `Project ${i + 1}`,
-    likes: Math.floor(Math.random() * 500)
-}));
+    const [showEditProfile, setShowEditProfile] = useState(false);
 
-  const posts = [
-    {
-      id: 1,
-      image: 'https://via.placeholder.com/600x400',
-      caption: 'New sketch inspired by quiet mornings 🌿',
-    },
-    {
-      id: 2,
-      image: 'https://via.placeholder.com/600x500',
-      caption: 'Experimenting with ink textures',
-    },
-  ]
+    const [selectedArtworkId, setSelectedArtworkId] = useState(null);
+    const selectedArtwork = artworks?.find(art => art.id === selectedArtworkId);
 
-  return (
-    <AuthenticatedLayout className="min-h-screen bg-white text-gray-900">
-      <div className="max-w-5xl mx-auto px-6 py-10">
+    const openEditModal = (post) => {
+        setPostToEdit(post);
+        setShowCreateModal(true);
+        setSelectedArtworkId(null);
+    }
 
-        <div className="flex items-center gap-6">
-          <img
-            src={user.avatar}
-            alt="Profile"
-            className="w-32 h-32 rounded-full object-cover border"
-          />
+    const closeModal = () => {
+        setShowCreateModal(false);
+        setPostToEdit(null);
+    }
 
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-semibold">{user.name}</h1>
-                <p className="text-gray-500">{user.username}</p>
-              </div>
-              <button className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-100">
-                Edit Profile
-              </button>
-            </div>
+    const isMyProfile = auth.user && auth.user.id === user.id;
 
-            <p className="mt-3 text-sm max-w-lg">{user.bio}</p>
+    return (
+        <AuthenticatedLayout className="min-h-screen bg-white text-gray-900">
+            <div className="max-w-5xl mx-auto px-6 py-10">
 
-            <div className="flex gap-6 mt-4 text-sm">
-              <span><strong>{user.artworks}</strong> artworks</span>
-              <span><strong>{user.posts}</strong> posts</span>
-            </div>
-          </div>
-        </div>
+                {/* --- HEADER SECTION --- */}
+                <div className="flex items-center gap-6">
+                    <img
+                        src={user?.profile_picture ? `/storage/${user.profile_picture}` : `https://ui-avatars.com/api/?name=${user?.name}&background=random`}
+                        alt="Profile"
+                        className="w-32 h-32 rounded-full object-cover border"
+                    />
 
-        {/* Tabs */}
-        <div className="flex gap-6 border-b mt-10">
-          <button
-            onClick={() => setActiveTab('artworks')}
-            className={`pb-3 text-sm font-medium ${
-              activeTab === 'artworks'
-                ? 'border-b-2 border-black'
-                : 'text-gray-500'
-            }`}
-          >
-            Artworks
-          </button>
+                    <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-2xl font-semibold">{user?.name || 'Guest User'}</h1>
+                                <p className="text-gray-500">@{user?.name?.toLowerCase().replace(/\s/g, '') || 'guest'}</p>
+                            </div>
+                            {isMyProfile && (
+                                <button
+                                    onClick={() => setShowEditProfile(true)}
+                                    className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-100 transition"
+                                >
+                                    Edit Profile
+                                </button>
+                            )}
+                        </div>
 
-          <button
-            onClick={() => setActiveTab('posts')}
-            className={`pb-3 text-sm font-medium ${
-              activeTab === 'posts'
-                ? 'border-b-2 border-black'
-                : 'text-gray-500'
-            }`}
-          >
-            Posts
-          </button>
-        </div>
+                        <p className="mt-3 text-sm max-w-lg">{user.bio}</p>
 
-        {/* Artwork Grid */}
-        {activeTab === 'artworks' && (
-          <div className="columns-2 md:columns-3 gap-8 mt-8 space-y-8">
-            {artworks.map((art, index) => (
-              <img
-                key={index}
-                src={art.image}
-                alt="Artwork"
-                className="w-full rounded-lg hover:opacity-90 transition"
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Posts */}
-        {activeTab === 'posts' && (
-          <div className="mt-8 space-y-8">
-            {posts.map(post => (
-              <div key={post.id} className="border rounded-xl overflow-hidden">
-
-                <img src={post.image} alt="Post" className="w-full" />
-                <div className="p-4 text-sm">
-                  {post.caption}
+                        <div className="flex gap-6 mt-4 text-sm">
+                            <span><strong>{user?.artworks_count}</strong> artworks</span>
+                            <span><strong>{user?.statuses_count}</strong> posts</span>
+                        </div>
+                    </div>
                 </div>
 
-              </div>
-            ))}
-          </div>
-        )}
+                {/* --- TABS --- */}
+                <div className="flex gap-6 border-b mt-10">
+                    <button
+                        onClick={() => setActiveTab('artworks')}
+                        className={`pb-3 text-sm font-medium ${activeTab === 'artworks' ? 'border-b-2 border-black' : 'text-gray-500'}`}
+                    >
+                        Artworks
+                    </button>
 
-      </div>
-    </AuthenticatedLayout>
-  )
+                    <button
+                        onClick={() => setActiveTab('posts')}
+                        className={`pb-3 text-sm font-medium ${activeTab === 'posts' ? 'border-b-2 border-black' : 'text-gray-500'}`}
+                    >
+                        Posts
+                    </button>
+                </div>
+
+                {/* --- ARTWORK GRID --- */}
+                {activeTab === 'artworks' && (
+                    <div className="grid grid-cols-3 gap-8 mt-8 space-y-8">
+                        {artworks?.map((art, index) => (
+                            <div
+                                key={index}
+                                onClick={() => setSelectedArtworkId(art.id)}
+                                className="relative aspect-square bg-gray-100 overflow-hidden group cursor-pointer"
+                            >
+                                {art.media && art.media[0] ? (
+                                    <img
+                                        src={`/storage/${art.media[0].file_path}`}
+                                        alt="Artwork"
+                                        className="w-full h-full object-cover rounded-lg hover:opacity-90 transition"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">No Image</div>
+                                )}
+
+                                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                                    <span className="text-white text-sm font-bold bg-black/50 px-3 py-1 rounded-full">View</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* --- POSTS FEED --- */}
+                {activeTab === 'posts' && (
+                    <div className="mt-8 space-y-8">
+                        {statuses.map(post => (
+                            <PostCard key={post.id} user={user} post={post} onEdit={openEditModal} />
+                        ))}
+                    </div>
+                )}
+
+
+                <PostModal
+                    show={showCreateModal}
+                    onClose={closeModal}
+                    postToEdit={postToEdit}
+                />
+
+                {selectedArtwork && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn"
+                        onClick={() => setSelectedArtworkId(null)}
+                    >
+                        <div className="relative w-full max-w-lg" onClick={e => e.stopPropagation()}>
+
+                            <button
+                                onClick={() => setSelectedArtworkId(null)}
+                                className="absolute -top-10 right-0 p-1 text-white hover:text-gray-300 transition"
+                            >
+                                <MdClose size={32} />
+                            </button>
+
+                            <div className="bg-white rounded-xl overflow-hidden shadow-2xl">
+                                <PostCard
+                                    user={auth?.user}
+                                    post={selectedArtwork}
+                                    onEdit={openEditModal}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <EditProfileModal
+                    show={showEditProfile}
+                    onClose={() => setShowEditProfile(false)}
+                    user={user}
+                />
+
+            </div>
+        </AuthenticatedLayout>
+    )
 }
 
 export default Profile

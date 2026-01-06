@@ -10,7 +10,7 @@ const MiniProfile = ({ user }) => {
             <Link href="/" className="gap-3">
                 <div className="w-20 h-20 mx-auto rounded-full bg-gray-300 overflow-hidden mb-3">
                     <img
-                        src={user?.profile_picture || `https://ui-avatars.com/api/?name=${user?.name}&background=random`}
+                        src={user?.profile_picture ? `/storage/${user?.profile_picture}` : `https://ui-avatars.com/api/?name=${user?.name}&background=random`}
                         alt="User"
                         className="w-full h-full object-cover"
                     />

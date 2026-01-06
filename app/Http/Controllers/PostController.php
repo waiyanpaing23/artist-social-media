@@ -168,7 +168,7 @@ class PostController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('feeds')->with('success', 'Post updated successfully.');
+            return redirect()->back()->with('success', 'Post updated successfully.');
 
         } catch (\Exception $e) {
             DB::rollBack();
