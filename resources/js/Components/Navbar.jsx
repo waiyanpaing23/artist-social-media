@@ -34,6 +34,10 @@ export default function Navbar({ onOpenCreate }) {
                         >
                             <FaPlus size={24} />
                         </button>
+
+                        <NavLink href="/follows" active={window.location.pathname === '/follows'}>
+                            <TbUsers size={28} />
+                        </NavLink>
                     </div>
 
                     <div className="flex items-center">

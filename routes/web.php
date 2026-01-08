@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\FollowController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
@@ -38,6 +39,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/comments', [CommentController::class, 'store'])->name('comment.store');
     Route::patch('/comments/{comment}', [CommentController::class, 'update'])->name('comment.update');
     Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('comment.destory');
+
+    Route::get('/follows', [FollowController::class, 'index'])->name('follow.index');
+    Route::post('/user/follow', [FollowController::class, 'follow'])->name('user.follow');
+    Route::post('/user/unfollow', [FollowController::class, 'unfollow'])->name('user.unfollow');
 });
 
 require __DIR__.'/auth.php';
