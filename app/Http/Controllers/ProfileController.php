@@ -19,16 +19,30 @@ class ProfileController extends Controller
 {
     public function index($id)
     {
+        $currentUser = Auth::user();
+
         $user = User::findOrFail($id);
-        $user->loadCount(['artworks', 'statuses']);
+        $user->loadCount(['artworks', 'statuses', 'followers', 'following']);
+
+        if ($currentUser) {
+            $user->loadExists(['followers as is_following' => function ($q) use ($currentUser) {
+                $q->where('follower_id', $currentUser->id);
+            }]);
+        } else {
+            $user->is_following = false;
+        }
 
         $post = Post::where('user_id', $user->id)
                 ->with('media', 'author')
                 ->orderBy('created_at', 'desc')
                 ->withCount('likes')
-                ->withExists(['likes as is_liked_by_user' => function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                }])
+                ->withExists(['likes as is_liked_by_user' => function ($query) use ($currentUser) {
+                    if ($currentUser) {
+                        $query->where('user_id', $currentUser->id);
+                    } else {
+                        $query->whereRaw('1 = 0'); // guest
+                    }
+                    }])
                 ->with([
                     'comments.user' => function($query) {
                         $query->select('id', 'name', 'profile_picture');
@@ -38,6 +52,8 @@ class ProfileController extends Controller
 
         $artworks = (clone $post)->where('type', 'artwork')->get();
         $statuses = (clone $post)->where('type', 'status')->get();
+
+        $user->is_following = (bool) $user->is_following;
 
         return Inertia::render('Profile', [
             'user' => $user,

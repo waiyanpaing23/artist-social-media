@@ -33,6 +33,7 @@ class FollowController extends Controller
             ->withExists(['followers as is_following' => function ($q) use ($currentUser) {
                 $q->where('follower_id', $currentUser->id);
             }])
+            ->withCount(['artworks', 'statuses'])
             ->latest()
             ->paginate(12)
             ->withQueryString();
@@ -45,6 +46,8 @@ class FollowController extends Controller
                 'profile_picture' => $user->profile_picture,
                 'bio' => $user->bio,
                 'is_following' => (bool) $user->is_following,
+                'artworks_count' => $user->artworks_count,
+                'statuses_count' => $user->statuses_count
             ];
         });
 
@@ -64,7 +67,7 @@ class FollowController extends Controller
 
         $currentUser->following()->syncWithoutDetaching($followUser->id);
 
-        return back();
+        return redirect()->back();
     }
 
     public function unfollow(Request $request)
@@ -76,6 +79,20 @@ class FollowController extends Controller
 
         $currentUser->following()->detach($unfollowUser->id);
 
-        return back();
+        return redirect()->back();
+    }
+
+    public function getConnections($id, $type)
+    {
+        $user = User::find($id);
+
+        $followers = $user->$type()
+                ->withExists(['followers as is_following' => function ($q) {
+                    $q->where('follower_id', Auth::id());
+                }])
+                ->latest()
+                ->get();
+
+        return $followers;
     }
 }

@@ -43,6 +43,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/follows', [FollowController::class, 'index'])->name('follow.index');
     Route::post('/user/follow', [FollowController::class, 'follow'])->name('user.follow');
     Route::post('/user/unfollow', [FollowController::class, 'unfollow'])->name('user.unfollow');
+
+    Route::get('/user/{id}/{type}', [FollowController::class, 'getConnections'])->name('user.connections');
 });
 
 require __DIR__.'/auth.php';

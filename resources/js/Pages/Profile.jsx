@@ -1,6 +1,8 @@
 import EditProfileModal from '@/Components/EditProfileModal';
+import FollowButton from '@/Components/FollowButton';
 import PostCard from '@/Components/PostCard';
 import PostModal from '@/Components/PostModal';
+import UserListModal from '@/Components/UserListModal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout'
 import { usePage } from '@inertiajs/react';
 import React, { useState } from 'react'
@@ -17,6 +19,24 @@ const Profile = ({ user, artworks, statuses }) => {
 
     const [selectedArtworkId, setSelectedArtworkId] = useState(null);
     const selectedArtwork = artworks?.find(art => art.id === selectedArtworkId);
+
+    const [followerModalState, setFollowerModalState] = useState({
+        show: false,
+        type: 'followers',
+        title: ''
+    });
+
+    const openFollowerModal = (type) => {
+        setFollowerModalState({
+            show: true,
+            type: type,
+            title: type === 'followers' ? 'Followers' : 'Following'
+        });
+    };
+
+    const closeFollowerModal = () => {
+        setFollowerModalState(prev => ({ ...prev, show: false }));
+    };
 
     const openEditModal = (post) => {
         setPostToEdit(post);
@@ -49,22 +69,36 @@ const Profile = ({ user, artworks, statuses }) => {
                                 <h1 className="text-2xl font-semibold">{user?.name || 'Guest User'}</h1>
                                 <p className="text-gray-500">@{user?.name?.toLowerCase().replace(/\s/g, '') || 'guest'}</p>
                             </div>
-                            {isMyProfile && (
+                            {isMyProfile ? (
                                 <button
                                     onClick={() => setShowEditProfile(true)}
                                     className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-100 transition"
                                 >
                                     Edit Profile
                                 </button>
-                            )}
+                            ) :
+                            (<FollowButton user={user} className="px-6" />)
+                            }
                         </div>
 
                         <p className="mt-3 text-sm max-w-lg">{user.bio}</p>
 
-                        <div className="flex gap-6 mt-4 text-sm">
-                            <span><strong>{user?.artworks_count}</strong> artworks</span>
-                            <span><strong>{user?.statuses_count}</strong> posts</span>
+                        <div className="mt-3 flex gap-4">
+                            <button onClick={() => openFollowerModal('followers')} className="hover:underline">
+                                <strong>{user.followers_count}</strong> followers
+                            </button>
+                            <button onClick={() => openFollowerModal('following')} className="hover:underline">
+                                <strong>{user.following_count}</strong> following
+                            </button>
                         </div>
+
+                        <UserListModal
+                            show={followerModalState.show}
+                            onClose={closeFollowerModal}
+                            userId={user.id}
+                            type={followerModalState.type}
+                            title={followerModalState.title}
+                        />
                     </div>
                 </div>
 
@@ -74,14 +108,14 @@ const Profile = ({ user, artworks, statuses }) => {
                         onClick={() => setActiveTab('artworks')}
                         className={`pb-3 text-sm font-medium ${activeTab === 'artworks' ? 'border-b-2 border-black' : 'text-gray-500'}`}
                     >
-                        Artworks
+                        {user?.artworks_count} Artworks
                     </button>
 
                     <button
                         onClick={() => setActiveTab('posts')}
                         className={`pb-3 text-sm font-medium ${activeTab === 'posts' ? 'border-b-2 border-black' : 'text-gray-500'}`}
                     >
-                        Posts
+                        {user?.statuses_count} Posts
                     </button>
                 </div>
 

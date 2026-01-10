@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import { MdPersonAdd, MdCheck } from "react-icons/md";
 
 const FollowButton = ({ user, className = "" }) => {
+    const [isFollowing, setIsFollowing] = useState(user.is_following);
+
     const { post, processing } = useForm({
         user_id: user.id
     });
@@ -10,15 +12,18 @@ const FollowButton = ({ user, className = "" }) => {
     const handleFollow = (e) => {
         e.stopPropagation();
 
-        if (user.is_following) {
-            post(route('user.unfollow'), {
-                preserveScroll: true,
-            });
-        } else {
-            post(route('user.follow'), {
-                preserveScroll: true,
-            });
-        }
+        const newState = !isFollowing;
+        setIsFollowing(newState);
+
+        const routeName = isFollowing ? 'user.unfollow' : 'user.follow';
+
+        post(route(routeName), {
+            preserveScroll: true,
+            only: ['flash'],
+            onError: () => {
+                setIsFollowing(!newState);
+            }
+        });
     };
 
     return (
@@ -27,7 +32,7 @@ const FollowButton = ({ user, className = "" }) => {
             disabled={processing}
             className={`
                 px-4 py-2 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-200
-                ${user.is_following
+                ${isFollowing
                     ? 'bg-gray-100 text-gray-800 hover:bg-red-50 hover:text-red-600 hover:border-red-100 border border-transparent'
                     : 'bg-black text-white hover:bg-gray-800 shadow-md hover:shadow-lg'
                 }
@@ -38,7 +43,7 @@ const FollowButton = ({ user, className = "" }) => {
                 <span className="opacity-50">Processing...</span>
             ) : (
                 <>
-                    {user.is_following ? (
+                    {isFollowing ? (
                         <>
                             {/* Show "Following" normally, "Unfollow" on hover */}
                             <span className="group-hover:hidden flex items-center gap-2"><MdCheck /> Following</span>

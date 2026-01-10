@@ -5,9 +5,11 @@ import PostCard from '@/Components/PostCard';
 import MiniProfile from '@/Components/MiniProfile';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PostModal from '@/Components/PostModal';
+import axios from 'axios';
 
 const Home = ({ posts }) => {
   const { auth } = usePage().props;
+
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [postToEdit, setPostToEdit] = useState(null);
 
@@ -34,8 +36,8 @@ const Home = ({ posts }) => {
                     <PostCard key={post.id} post={post} user={auth?.user} onEdit={openEditModal} />
                 ))}
 
-                <div className="p-8 text-center text-gray-500">
-                    You've reached the end! 🎨
+                <div className="p-8 text-center">
+                    <span className="text-gray-400 text-sm">You've reached the end! 🎨</span>
                 </div>
             </div>
 

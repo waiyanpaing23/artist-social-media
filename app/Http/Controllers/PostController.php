@@ -17,11 +17,17 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $user_id = Auth::id();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        $followedUsersId = $user->following()->pluck('users.id');
+        $allowedUsers = $followedUsersId->push($user_id);
 
         $posts = Post::with('media', 'author')
+                ->whereIn('user_id', $allowedUsers)
                 ->orderBy('created_at', 'desc')
                 ->withCount('likes')
                 ->withExists(['likes as is_liked_by_user' => function ($query) use ($user_id) {
@@ -35,7 +41,11 @@ class PostController extends Controller
                 ->withCount('comments')
                 ->get();
 
-        return Inertia::render('Home/Home', [
+        if ($request->wantsJson() && !$request->header('X-Inertia')) {
+            return response()->json($posts);
+        }
+
+        return Inertia::render('Home', [
             'posts' => $posts,
         ]);
     }

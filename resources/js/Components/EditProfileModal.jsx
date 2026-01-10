@@ -64,7 +64,7 @@ const EditProfileModal = ({ show, onClose, user }) => {
                             <div className="relative group cursor-pointer">
                                 <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200">
                                     <img
-                                        src={preview || `/storage/${user.profile_picture}` || `https://ui-avatars.com/api/?name=${user.name}&background=random`}
+                                        src={preview || (user.profile_picture ? `/storage/${user.profile_picture}` : `https://ui-avatars.com/api/?name=${user.name}&background=random`)}
                                         alt="Profile Preview"
                                         className="w-full h-full object-cover"
                                     />

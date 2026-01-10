@@ -1,6 +1,6 @@
 import FollowButton from '@/Components/FollowButton';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { router } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import React, { useState } from 'react';
 import { MdPersonAdd, MdCheck, MdClose, MdSearch } from "react-icons/md";
 
@@ -39,32 +39,41 @@ const FollowSection = ({users, filters}) => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {users.data.map((user) => {
-
                         return (
-                            <div key={user.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition relative group">
+                            <div
+                                key={user.id}
+                                onClick={() => router.visit(route('profile.index', user.id))}
+                                className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition relative group cursor-pointer flex flex-col items-center"
+                            >
+                                {/* Avatar */}
+                                <div className="w-20 h-20 rounded-full overflow-hidden mb-3 border-4 border-gray-50 shadow-sm">
+                                    <img
+                                        src={user.profile_picture ? `/storage/${user.profile_picture}` : `https://ui-avatars.com/api/?name=${user.name}&background=random`}
+                                        alt={user.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
 
-                                <div className="flex flex-col items-center text-center">
-                                    {/* Avatar */}
-                                    <div className="w-20 h-20 rounded-full overflow-hidden mb-4 border-4 border-gray-50">
-                                        <img
-                                            src={user.profile_picture ? `/storage/${user.profile_picture}` : `https://ui-avatars.com/api/?name=${user.name}&background=random`}
-                                            alt={user.name}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
+                                {/* Name */}
+                                <h3 className="font-bold text-lg text-gray-900 mb-4">{user.name}</h3>
 
-                                    {/* Info */}
-                                    <h3 className="font-bold text-lg text-gray-900">{user.name}</h3>
-                                    {/* <p className="text-sm text-gray-500 mb-2">{user.username}</p> */}
+                                <div className="flex items-center gap-2 text-xs text-gray-500 font-medium mb-3">
+                                    <span>{user.artworks_count} Artworks</span>
+                                    <span className="w-1 h-1 bg-gray-300 rounded-full"></span> {/* Dot Separator */}
+                                    <span>{user.statuses_count} Posts</span>
+                                </div>
 
-                                    <p className="text-sm text-gray-600 line-clamp-2 min-h-[40px] mb-4">
-                                        {user.bio}
-                                    </p>
+                                <div className="text-sm text-gray-600 text-center line-clamp-2 mb-4 w-full px-2">
+                                    {user.bio ? (
+                                        user.bio
+                                    ) : (
+                                        <span className="text-gray-400 italic">No bio available</span>
+                                    )}
+                                </div>
 
-                                    {/* Follow Button */}
-                                    <div className="mt-4 group">
-                                        <FollowButton user={user} className="w-full" />
-                                    </div>
+                                {/* Follow Button - Pushed to bottom */}
+                                <div className="w-full mt-auto" onClick={(e) => e.stopPropagation()}>
+                                    <FollowButton user={user} className="w-full" />
                                 </div>
                             </div>
                         );
