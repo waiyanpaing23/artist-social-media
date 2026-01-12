@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useForm, usePage, Link } from '@inertiajs/react';
+import { useForm, usePage, Link, router } from '@inertiajs/react';
 import { MdClose, MdCheck } from 'react-icons/md';
-import TimeAgo from './TimeAgo'; // Adjust path as needed
+import TimeAgo from './TimeAgo';
 
-const CommentItem = ({ comment }) => {
+const CommentItem = ({ comment, onDeleteSuccess, onUpdateSuccess }) => {
     const { auth } = usePage().props;
     const [isEditing, setIsEditing] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
@@ -19,13 +19,29 @@ const CommentItem = ({ comment }) => {
             onSuccess: () => {
                 setIsEditing(false);
                 setShowDropdown(false);
+
+                if (onUpdateSuccess) {
+                    onUpdateSuccess(comment.id, data.content);
+                }
+            }
+        });
+    };
+
+    const handleDelete = () => {
+        setShowDropdown(false);
+
+        router.delete(`/comments/${comment.id}`, {
+            preserveScroll: true,
+            only: ['flash'],
+            onSuccess: () => {
+                if (onDeleteSuccess) onDeleteSuccess(comment.id);
             }
         });
     };
 
     const cancelEdit = () => {
         setIsEditing(false);
-        reset(); // Revert text back to original
+        reset();
         clearErrors();
         setShowDropdown(false);
     };
@@ -33,7 +49,7 @@ const CommentItem = ({ comment }) => {
     return (
         <div className="flex gap-3 group">
             <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 overflow-hidden mt-1">
-                <img src={comment.user?.profile_picture ? `/storage/${comment.user?.profile_picture}` : `https://ui-avatars.com/api/?name=${comment.user.name}&background=random`} alt={comment.user.name} />
+                <img src={comment.user?.profile_picture ? `/storage/${comment.user?.profile_picture}` : `https://ui-avatars.com/api/?name=${comment.user?.name}&background=random`} alt={comment.user?.name} />
             </div>
 
             <div className="flex-1">
@@ -67,10 +83,9 @@ const CommentItem = ({ comment }) => {
                     <>
                         <div className="bg-gray-100 p-3 rounded-2xl shadow-sm relative group border border-gray-100">
                             <div className="flex justify-between items-start">
-                                <span className="font-bold text-sm text-gray-900">{comment.user.name}</span>
+                                <span className="font-bold text-sm text-gray-900">{comment.user?.name}</span>
 
-                                {/* Dropdown Trigger */}
-                                {auth.user && auth.user.id === comment.user.id && (
+                                {auth.user && auth.user.id === comment.user?.id && (
                                     <div className='relative'>
                                         <button onClick={() => setShowDropdown(!showDropdown)} className='text-gray-400 hover:text-gray-600 font-bold px-1'>•••</button>
 
@@ -87,14 +102,12 @@ const CommentItem = ({ comment }) => {
                                                     >
                                                         Edit
                                                     </button>
-                                                    <Link
-                                                        href={`/comments/${comment.id}`}
-                                                        method="delete"
-                                                        preserveScroll
+                                                    <button
+                                                        onClick={handleDelete}
                                                         className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                                                     >
                                                         Delete
-                                                    </Link>
+                                                    </button>
                                                 </div>
                                             </>
                                         )}

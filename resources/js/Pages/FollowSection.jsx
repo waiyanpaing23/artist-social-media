@@ -1,8 +1,8 @@
 import FollowButton from '@/Components/FollowButton';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Link, router } from '@inertiajs/react';
-import React, { useState } from 'react';
-import { MdPersonAdd, MdCheck, MdClose, MdSearch } from "react-icons/md";
+import { router } from '@inertiajs/react';
+import React from 'react';
+import { MdSearch } from "react-icons/md";
 
 const FollowSection = ({users, filters}) => {
 
@@ -59,7 +59,7 @@ const FollowSection = ({users, filters}) => {
 
                                 <div className="flex items-center gap-2 text-xs text-gray-500 font-medium mb-3">
                                     <span>{user.artworks_count} Artworks</span>
-                                    <span className="w-1 h-1 bg-gray-300 rounded-full"></span> {/* Dot Separator */}
+                                    <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                                     <span>{user.statuses_count} Posts</span>
                                 </div>
 
@@ -71,7 +71,6 @@ const FollowSection = ({users, filters}) => {
                                     )}
                                 </div>
 
-                                {/* Follow Button - Pushed to bottom */}
                                 <div className="w-full mt-auto" onClick={(e) => e.stopPropagation()}>
                                     <FollowButton user={user} className="w-full" />
                                 </div>

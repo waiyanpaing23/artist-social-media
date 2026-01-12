@@ -45,7 +45,6 @@ const FollowButton = ({ user, className = "" }) => {
                 <>
                     {isFollowing ? (
                         <>
-                            {/* Show "Following" normally, "Unfollow" on hover */}
                             <span className="group-hover:hidden flex items-center gap-2"><MdCheck /> Following</span>
                             <span className="hidden group-hover:inline">Unfollow</span>
                         </>

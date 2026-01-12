@@ -3,7 +3,7 @@ import { useForm } from '@inertiajs/react';
 import { MdClose } from 'react-icons/md';
 import ImageUploadGrid from './ImageUploadGrid';
 
-const PostModal = ({ show, onClose, postToEdit = null }) => {
+const PostModal = ({ show, onClose, postToEdit = null, onPostSuccess }) => {
     if (!show) return null;
 
     const initialType = postToEdit ? postToEdit.type : 'artwork';
@@ -47,13 +47,14 @@ const PostModal = ({ show, onClose, postToEdit = null }) => {
 
     const submit = (e) => {
         e.preventDefault();
-
         const url = postToEdit ? `/posts/${postToEdit.id}` : '/posts';
 
         submitPost(url, {
-            onSuccess: () => {
+            preserveScroll: true,
+            onSuccess: (page) => {
                 reset();
                 onClose();
+                if (onPostSuccess) onPostSuccess();
             }
         });
     };

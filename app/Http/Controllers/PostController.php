@@ -39,7 +39,7 @@ class PostController extends Controller
                     }
                 ])
                 ->withCount('comments')
-                ->get();
+                ->cursorPaginate(5);
 
         if ($request->wantsJson() && !$request->header('X-Inertia')) {
             return response()->json($posts);
@@ -141,7 +141,7 @@ class PostController extends Controller
                 'dimensions' => $request->dimensions,
             ]);
 
-            // Handle deletion of existing media
+            // delete existing media
             if ($request->filled('deleted_media_ids')) {
                 foreach ($request->deleted_media_ids as $mediaId) {
                     $media = $post->media()->find($mediaId);
@@ -152,7 +152,7 @@ class PostController extends Controller
                 }
             }
 
-            // Handle new media uploads
+            // new media upload
             if ($request->hasFile('main_artwork')) {
                 foreach($request->file('main_artwork') as $artwork) {
                     $artworkName = Str::uuid() . '_' . $artwork->getClientOriginalName();
@@ -202,7 +202,7 @@ class PostController extends Controller
             $media->delete(); // file delete
         }
 
-        $post->delete(); // post delete
+        $post->delete();
 
         return redirect()->route('feeds')->with('success', 'Post deleted successfully.');
     }

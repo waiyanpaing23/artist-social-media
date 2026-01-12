@@ -22,12 +22,15 @@ class CommentController extends Controller
                 'content' => $request->content
             ]);
 
+            $comment->load('user');
+
             DB::commit();
-            return redirect()->back();
+
+            return response()->json($comment);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Failed');
+            return response()->json(['error' => 'Failed to post comment'], 500);
         }
     }
 
@@ -46,7 +49,7 @@ class CommentController extends Controller
             'content' => $request->content
         ]);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Comment Updated Successfully!');
     }
 
 

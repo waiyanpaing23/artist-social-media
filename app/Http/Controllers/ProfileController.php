@@ -65,15 +65,23 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
+        $user = $request->user();
+
         $request->validate([
             'name' => 'required|string|max:255',
+            'username' => [
+                'required',
+                'string',
+                'max:30',
+                'regex:/^@[a-zA-Z0-9_.]+$/',
+                'unique:users,username,' . $user->id
+            ],
             'bio' => 'nullable|string|max:1000',
             'profile_picture' => 'nullable|image|max:5120',
         ]);
 
-        $user = $request->user();
-
         $user->name = $request->name;
+        $user->username = $request->username;
         $user->bio = $request->bio;
 
         if($request->hasFile('profile_picture')) {

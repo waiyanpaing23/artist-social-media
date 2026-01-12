@@ -1,30 +1,66 @@
-import { useForm, usePage } from '@inertiajs/react'
-import React, { useRef } from 'react'
+import { router, useForm, usePage } from '@inertiajs/react'
+import React, { useRef, useState } from 'react'
 import { MdClose, MdSend } from 'react-icons/md';
 import CommentItem from './CommentItem'; // <--- Import the new component
 
-const CommentSection = ({onClose, postId, comments}) => {
+const CommentSection = ({onClose, postId, initialComments, onCommentCountChange}) => {
     const { auth } = usePage().props;
     const scrollRef = useRef(null);
 
-    // Form specifically for CREATING new comments
-    const {data, setData, post, processing, reset} = useForm({
-        post_id: postId,
-        content: ''
-    })
+    const [comments, setComments] = useState(initialComments);
+    const [newCommentBody, setNewCommentBody] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post('/comments', {
-            preserveScroll: true,
-            onSuccess: () => {
-                reset();
-                if (scrollRef.current) {
-                    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-                }
+        if (!newCommentBody.trim()) return;
+
+        setIsSubmitting(true);
+        axios.post('/comments', {
+            post_id: postId,
+            content: newCommentBody
+        })
+        .then(response => {
+            const newComment = response.data;
+
+            const newCommentsList = [...comments, newComment];
+            setComments(newCommentsList);
+
+            if (onCommentCountChange) {
+                onCommentCountChange(newCommentsList.length);
             }
+
+            setNewCommentBody('');
+            setIsSubmitting(false);
+
+            setTimeout(() => {
+            if (scrollRef.current) {
+                scrollRef.current.scrollTo({
+                    top: scrollRef.current.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        }, 100);
+        })
+        .catch(error => {
+            console.error("Failed to post comment:", error);
+            setIsSubmitting(false);
         });
     }
+
+    const handleCommentDelete = (deletedCommentId) => {
+        const newList = comments.filter(c => c.id !== deletedCommentId);
+        setComments(newList);
+        if (onCommentCountChange) onCommentCountChange(newList.length);
+    };
+
+    const handleCommentUpdate = (id, newContent) => {
+        setComments(prevComments =>
+            prevComments.map(comment =>
+                comment.id === id ? { ...comment, content: newContent } : comment
+            )
+        );
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
@@ -42,8 +78,11 @@ const CommentSection = ({onClose, postId, comments}) => {
                 <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={scrollRef}>
                     {comments && comments.length > 0 ? (
                         comments.map((comment) => (
-                            // Render the separate item component
-                            <CommentItem key={comment.id} comment={comment} />
+                            <CommentItem
+                                key={comment.id}
+                                comment={comment}
+                                onDeleteSuccess={handleCommentDelete}
+                                onUpdateSuccess={handleCommentUpdate} />
                         ))
                     ) : (
                         <div className="h-full flex flex-col items-center justify-center text-gray-400">
@@ -59,14 +98,15 @@ const CommentSection = ({onClose, postId, comments}) => {
                         </div>
                         <input
                             type="text"
-                            value={data.content}
-                            onChange={e => setData('content', e.target.value)}
+                            value={newCommentBody}
+                            onChange={e => setNewCommentBody(e.target.value)}
                             placeholder="Add a comment..."
                             className="flex-1 bg-gray-100 border-0 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
                             autoFocus
                         />
                         <button
                             type="submit"
+                            disabled={isSubmitting}
                             className="p-2 text-blue-600 font-semibold hover:bg-blue-50 rounded-full disabled:opacity-50 disabled:hover:bg-transparent transition"
                         >
                             Post

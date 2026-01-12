@@ -5,9 +5,9 @@ const MiniProfile = ({ user }) => {
 
   return (
     <aside className="hidden md:flex flex-col w-80 h-[calc(100vh-5rem)] sticky top-20 border-r border-gray-200 p-6 font-sans overflow-y-auto">
-        {/* 1. Header / Switch Profile Section */}
+
         <div className="flex items-center justify-center mb-8">
-            <Link href="/" className="gap-3">
+            <Link href="/" className="flex flex-col items-center">
                 <div className="w-20 h-20 mx-auto rounded-full bg-gray-300 overflow-hidden mb-3">
                     <img
                         src={user?.profile_picture ? `/storage/${user?.profile_picture}` : `https://ui-avatars.com/api/?name=${user?.name}&background=random`}
@@ -16,7 +16,7 @@ const MiniProfile = ({ user }) => {
                     />
                 </div>
                 <h3 className="font-bold text-lg text-gray-900">{user?.name || 'Guest User'}</h3>
-                <p className="text-gray-500 text-sm">@{user?.name?.toLowerCase().replace(/\s/g, '') || 'guest'}</p>
+                {user?.username && <p className="text-gray-500 text-sm">{user?.username}</p>}
             </Link>
         </div>
 
@@ -40,7 +40,7 @@ const MiniProfile = ({ user }) => {
             </div>
         </div>
 
-        {/* 5. Footer Links */}
+        {/* Footer */}
         <div className="mt-auto pt-6 text-[11px] text-gray-300 space-x-2">
             <a href="#" className="hover:underline">About</a> •
             <a href="#" className="hover:underline">Help</a> •

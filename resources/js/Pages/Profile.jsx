@@ -55,7 +55,7 @@ const Profile = ({ user, artworks, statuses }) => {
         <AuthenticatedLayout className="min-h-screen bg-white text-gray-900">
             <div className="max-w-5xl mx-auto px-6 py-10">
 
-                {/* --- HEADER SECTION --- */}
+                {/* --- Header --- */}
                 <div className="flex items-center gap-6">
                     <img
                         src={user?.profile_picture ? `/storage/${user.profile_picture}` : `https://ui-avatars.com/api/?name=${user?.name}&background=random`}
@@ -67,7 +67,7 @@ const Profile = ({ user, artworks, statuses }) => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <h1 className="text-2xl font-semibold">{user?.name || 'Guest User'}</h1>
-                                <p className="text-gray-500">@{user?.name?.toLowerCase().replace(/\s/g, '') || 'guest'}</p>
+                                {user?.username && <p className="text-gray-500">{user?.username}</p>}
                             </div>
                             {isMyProfile ? (
                                 <button
@@ -102,7 +102,7 @@ const Profile = ({ user, artworks, statuses }) => {
                     </div>
                 </div>
 
-                {/* --- TABS --- */}
+                {/* --- Tabs --- */}
                 <div className="flex gap-6 border-b mt-10">
                     <button
                         onClick={() => setActiveTab('artworks')}
@@ -119,7 +119,7 @@ const Profile = ({ user, artworks, statuses }) => {
                     </button>
                 </div>
 
-                {/* --- ARTWORK GRID --- */}
+                {/* --- Artwork --- */}
                 {activeTab === 'artworks' && (
                     <div className="grid grid-cols-3 gap-8 mt-8 space-y-8">
                         {artworks?.map((art, index) => (
@@ -146,7 +146,7 @@ const Profile = ({ user, artworks, statuses }) => {
                     </div>
                 )}
 
-                {/* --- POSTS FEED --- */}
+                {/* --- Posts --- */}
                 {activeTab === 'posts' && (
                     <div className="mt-8 space-y-8">
                         {statuses.map(post => (

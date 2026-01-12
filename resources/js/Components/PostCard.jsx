@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FaTrash, FaExclamationTriangle } from "react-icons/fa";
+import { FaExclamationTriangle } from "react-icons/fa";
 import { FaHandsClapping, FaRegComment } from 'react-icons/fa6';
 import { IoColorPalette } from "react-icons/io5";
 import { PiHandsClapping } from "react-icons/pi";
@@ -8,7 +8,7 @@ import ImageCarousel from './ImageCarousel';
 import { Link, router, usePage } from '@inertiajs/react';
 import CommentSection from './CommentSection';
 
-const PostCard = ({ user, post, onEdit }) => {
+const PostCard = ({ user, post, onEdit, onRemove }) => {
 
     const { auth } = usePage().props;
     const images = post.media || [];
@@ -16,20 +16,40 @@ const PostCard = ({ user, post, onEdit }) => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+    const [commentCount, setCommentCount] = useState(post.comments_count);
+
+    const [isLiked, setIsLiked] = useState(post.is_liked_by_user);
+    const [likeCount, setLikeCount] = useState(post.likes_count);
+    const [isDeleted, setIsDeleted] = useState(false);
+
     const [showComments, setShowComments] = useState(false);
 
     const handleDeletePost = () => {
-        router.delete(`/post/delete/${post.id}`, {
-            onSuccess: () => {
-                setShowDeleteConfirm(false);
-            },
+        router.delete(`/post/${post.id}`, {
             preserveScroll: true,
+            only: ['flash'],
+            onSuccess: () => {
+                onRemove(post.id)
+            },
         });
     };
 
+    if (isDeleted) return null;
+
     const handleLike = () => {
+        const newState = !isLiked;
+        setIsLiked(newState);
+        setLikeCount(prev => newState ? prev + 1 : prev - 1);
+
         router.post('/post/like', {post_id: post.id}, {
-            preserveScroll: true
+            preserveScroll: true,
+            preserveState: true,
+            only: ['flash'],
+
+            onError: () => {
+                setIsLiked(!newState);
+                setLikeCount(prev => !newState ? prev + 1 : prev - 1);
+            }
         });
     }
 
@@ -142,13 +162,13 @@ const PostCard = ({ user, post, onEdit }) => {
                 </div>
             )}
 
-            {/* Minimal Actions */}
+            {/* like, comment */}
             <div className="flex items-cente mt-5 gap-6">
                 <button
                     onClick={handleLike}
                     className="group flex items-center gap-2">
                     <span className="text-xl group-hover:scale-110 transition">
-                        {post.is_liked_by_user ? (
+                        {isLiked ? (
                             <FaHandsClapping size={26} />
                         ) : (
                             <PiHandsClapping size={26} />
@@ -162,14 +182,20 @@ const PostCard = ({ user, post, onEdit }) => {
                 </button>
             </div>
             <div className="mt-3 text-sm font-semibold text-gray-600">
-                <span>{post.likes_count} Appreciations</span>
-                <span onClick={() => setShowComments(!showComments)} className='ms-8 cursor-pointer'>{post.comments_count} Comments</span>
+                <span>{likeCount} Appreciations</span>
+                <span onClick={() => setShowComments(!showComments)} className='ms-8 cursor-pointer'>{commentCount} Comments</span>
             </div>
 
             {showComments &&
-                <CommentSection onClose={closeComment} user={user} postId={post.id} comments={post.comments || []} />
+                <CommentSection
+                    onClose={closeComment}
+                    user={user}
+                    postId={post.id}
+                    initialComments={post.comments || []}
+                    onCommentCountChange={(newCount) => setCommentCount(newCount)} />
             }
 
+            {/* Delete confirmation box */}
             {showDeleteConfirm && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
                     <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden transform transition-all scale-100">
@@ -185,7 +211,6 @@ const PostCard = ({ user, post, onEdit }) => {
                             </p>
                         </div>
 
-                        {/* Buttons */}
                         <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
                             <button
                                 type="button"

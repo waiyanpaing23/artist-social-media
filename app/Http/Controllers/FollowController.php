@@ -22,7 +22,7 @@ class FollowController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%");
+                ->orWhere('username', 'like', "%{$search}%");
             });
         } else {
             $followedUsersId = $currentUser->following()->pluck('users.id');

@@ -12,6 +12,7 @@ const EditProfileModal = ({ show, onClose, user }) => {
     const { data, setData, post, processing, errors, reset } = useForm({
         _method: 'PATCH',
         name: user.name || '',
+        username: user.username || '',
         bio: user.bio || '',
         profile_picture: null,
     });
@@ -23,12 +24,25 @@ const EditProfileModal = ({ show, onClose, user }) => {
             setData({
                 _method: 'PATCH',
                 name: user.name || '',
+                username: user.username || '',
                 bio: user.bio || '',
                 profile_picture: null
             });
             setPreview(null);
         }
     }, [show, user]);
+
+    const handleUsernameChange = (e) => {
+        let value = e.target.value;
+
+        if (!value.startsWith('@')) {
+            value = '@' + value.replace(/@/g, '');
+        }
+
+        value = value.replace(/[^a-zA-Z0-9_.\-@]/g, '').toLowerCase();
+
+        setData('username', value);
+    };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -95,6 +109,23 @@ const EditProfileModal = ({ show, onClose, user }) => {
                                 required
                             />
                             <InputError message={errors.name} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="username" value="Username" />
+                            <TextInput
+                                id="username"
+                                type="text"
+                                className="mt-1 block w-full bg-gray-50"
+                                value={data.username}
+                                onChange={handleUsernameChange}
+                                placeholder="@username"
+                                required
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Only letters, numbers, underscores, and dots allowed. No spaces.
+                            </p>
+                            <InputError message={errors.username} className="mt-2" />
                         </div>
 
                         <div>
