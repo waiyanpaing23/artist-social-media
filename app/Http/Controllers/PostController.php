@@ -24,11 +24,8 @@ class PostController extends Controller
         $user_id = $user->id;
 
         $followedUsersId = $user->following()->pluck('users.id');
-        $allowedUsers = $followedUsersId->push($user_id);
 
-        $posts = Post::with('media', 'author')
-                ->whereIn('user_id', $allowedUsers)
-                ->orderBy('created_at', 'desc')
+        $query = Post::with('media', 'author')
                 ->withCount('likes')
                 ->withExists(['likes as is_liked_by_user' => function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
@@ -39,7 +36,14 @@ class PostController extends Controller
                     }
                 ])
                 ->withCount('comments')
-                ->cursorPaginate(5);
+                ->orderBy('created_at', 'desc');
+
+        if ($followedUsersId->isNotEmpty()) {
+            $allowedUsers = $followedUsersId->push($user_id);
+            $query->whereIn('user_id', $allowedUsers);
+        }
+
+        $posts = $query->cursorPaginate(5);
 
         if ($request->wantsJson() && !$request->header('X-Inertia')) {
             return response()->json($posts);
@@ -47,6 +51,7 @@ class PostController extends Controller
 
         return Inertia::render('Home', [
             'posts' => $posts,
+            'isGlobalFeed' => $followedUsersId->isEmpty(),
         ]);
     }
 

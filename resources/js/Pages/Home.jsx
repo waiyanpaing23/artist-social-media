@@ -7,7 +7,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PostModal from '@/Components/PostModal';
 import axios from 'axios';
 
-const Home = ({ posts: initialPosts }) => {
+const Home = ({ posts: initialPosts, isGlobalFeed }) => {
     const { auth } = usePage().props;
 
     const [localPosts, setLocalPosts] = useState(initialPosts.data);
@@ -63,6 +63,16 @@ const Home = ({ posts: initialPosts }) => {
                 <main className="flex-1 min-w-0 mx-5">
 
                     <div className="pb-20">
+
+                        {isGlobalFeed && (
+                            <div className="bg-blue-50 p-4 rounded-xl my-4 border border-blue-100">
+                                <h3 className="font-bold text-blue-800">Welcome to Artizen! 👋</h3>
+                                <p className="text-sm text-blue-600">
+                                    You aren't following anyone yet, so we are showing you the latest artworks.
+                                </p>
+                            </div>
+                        )}
+
                         {localPosts.map(post => (
                             <PostCard key={post.id} post={post} user={auth?.user} onEdit={openEditModal} onRemove={handlePostDelete} />
                         ))}
