@@ -1,0 +1,67 @@
+name: Mocked CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # -------------------------------------------
+  # CI (Testing Phase)
+  # -------------------------------------------
+  test:
+    name: Run Unit & Feature Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo, sqlite3
+
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Prepare Environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run Tests
+        run: php artisan test
+
+  # -------------------------------------------
+  # CD (Mock Deployment Phase)
+  # -------------------------------------------
+  deploy:
+    name: Mock Deployment
+    needs: test # !! Important !! Will continue only after test is successful
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Simulate Deployment Process
+        run: |
+          echo "🚀 Starting mock deployment..."
+          echo "-----------------------------------"
+
+          echo "🔌 Connecting to server via SSH (Simulated)..."
+          sleep 2 # Wait for 2 seconds
+
+          echo "📦 Pulling latest code from GitHub (git pull)..."
+          sleep 2
+
+          echo "📦 Installing dependencies (composer install)..."
+          sleep 2
+
+          echo "🔨 Running database migrations..."
+          sleep 2
+
+          echo "🧹 Clearing caches (php artisan optimize:clear)..."
+          sleep 1
+
+          echo "-----------------------------------"
+          echo "🎉 Deployment successful! (Note: This is a simulated run)"
