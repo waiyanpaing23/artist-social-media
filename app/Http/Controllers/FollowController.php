@@ -3,56 +3,35 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\UserSearchService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class FollowController extends Controller
 {
+    protected UserSearchService $searchService;
+
+    public function __construct(UserSearchService $searchService)
+    {
+        $this->searchService = $searchService;
+    }
+
+
     public function index(Request $request)
     {
         /** @var \App\Models\User $currentUser */
         $currentUser = Auth::user();
         $search = $request->input('search');
 
-        $followedUsersId = $currentUser->following()->pluck('users.id');
+        $users = $this->searchService->searchUsers($currentUser, $search);
 
-        $query = User::query()->where('id', '!=', $currentUser->id); // exclude self
-
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                ->orWhere('username', 'like', "%{$search}%");
-            });
-        } else {
-            $followedUsersId = $currentUser->following()->pluck('users.id');
-            $query->whereNotIn('id', $followedUsersId);
-        }
-
-        $users = $query
-            ->withExists(['followers as is_following' => function ($q) use ($currentUser) {
-                $q->where('follower_id', $currentUser->id);
-            }])
-            ->withCount(['artworks', 'statuses'])
-            ->latest()
-            ->paginate(12)
-            ->withQueryString();
-
-        $users->through(function ($user) {
-            return [
-                'id' => $user->id,
-                'name' => $user->name,
-                'username' => '@' . strtolower(str_replace(' ', '', $user->name)),
-                'profile_picture' => $user->profile_picture,
-                'bio' => $user->bio,
-                'is_following' => (bool) $user->is_following,
-                'artworks_count' => $user->artworks_count,
-                'statuses_count' => $user->statuses_count
-            ];
-        });
+        $transformedUsers = $users->through(
+            fn($user) => $this->searchService->transformUser($user)
+        );
 
         return Inertia::render('FollowSection', [
-            'users' => $users,
+            'users' => $transformedUsers,
             'filters' => $request->only(['search'])
         ]);
     }
@@ -93,6 +72,6 @@ class FollowController extends Controller
                 ->latest()
                 ->get();
 
-        return $followers;
+        return response()->json($followers);
     }
 }
